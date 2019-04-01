@@ -28,12 +28,13 @@ int main(){
     for(int i=0; i<dots.size(); i++){
         sort(dots[i].begin(), dots[i].end());
         for(int j=0; j<dots[i].size(); j++){
-            int mx = 0;
-            if(j > 0) mx = max(mx, dots[i][j] - dots[i][j-1]);
-            if(j+1 < dots[i].size()) mx = max(mx, dots[i][j+1] - dots[i][j]);
-            ans += mx;
+            int mn = 2e9;
+            if(j > 0) mn = min(mn, dots[i][j] - dots[i][j-1]);
+            if(j+1 < dots[i].size()) mn = min(mn, dots[i][j+1] - dots[i][j]);
+            if(mn != 2e9) ans += mn;
         }
     }
     printf("%lld", ans);
     return 0;
 }
+

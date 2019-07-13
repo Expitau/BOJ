@@ -1,24 +1,20 @@
 #include <cstdio>
-#include <queue>
 #include <algorithm>
+#include <deque>
 using namespace std;
-class data{
-public:
-	int val, ind;
-	data(int _v=0, int _i=0):val(_v),ind(_i){}
-	bool operator<(const data & D)const{
-		return val>D.val;
-	}
-};
-priority_queue<data> que;
+
+deque<pair<int, int>> dque;
+
 int main(){
 	int n, l;
 	scanf("%d %d", &n, &l);
 	for(int i=0; i<n; i++){
-		int a; scanf("%d", &a);
-		que.push({a, i});
-		while(que.top().ind + l <= i) que.pop();
-		printf("%d ", que.top().val);
+		int k;
+		scanf("%d", &k);
+		if(!dque.empty() && dque.front().second <= i-l) dque.pop_front();
+		while(!dque.empty() && dque.back().first > k) dque.pop_back();
+		dque.push_back({k, i});
+		printf("%d ", dque.front().first);
 	}
 	return 0;
 }

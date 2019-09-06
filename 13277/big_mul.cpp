@@ -52,7 +52,17 @@ void multiply(vector<base> & a, vector<base> & b){
 	fft(a, true);
 }
 
+vector<base> a, b;
+char str[300100];
+
 int main(){
-		
+	scanf("%s", str);
+	for(int i=0; str[i]; i++) 
+		a.push_back(str[i]-'0');
+	scanf("%s", str);
+	for(int i=0; str[i]; i++)
+		b.push_back(str[i]-'0');
+	multiply(a, b);
+	for(auto it : a) printf("%d", (int)real(it));
 	return 0;
 }

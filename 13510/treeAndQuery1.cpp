@@ -81,7 +81,7 @@ int lca(int s, int e){
     for(int i=0; i<17; i++){
         if((dx >> i) & 1)  e = par[i][e];
     }
-    for(int i=16; i>=0; i++){
+    for(int i=16; i>=0; i--){
         if(par[i][s] != par[i][e]){
             s = par[i][s];
             e = par[i][e];
@@ -92,7 +92,6 @@ int lca(int s, int e){
 }
 
 int query(int s, int e){
-    printf("query : %d %d\n", s, e);
     int ret = 0;
     while(comp[s] != comp[e]){
         ret = max(ret, seg.query(lab[head[comp[s]]], lab[s]));
@@ -130,12 +129,10 @@ int main(){
     for(int i=0; i<m; i++){
         int q, u, v;
         scanf("%d %d %d", &q, &u, &v);
-        printf("input : %d %d %d\n", q, u, v);
         if(q == 1){
             if(dep[s[u]] > dep[e[u]]) swap(s[u], e[u]);
             seg.add(lab[e[u]], v);
         }else{
-            printf("lca %d %d : %d\n", u,v,lca(u, v));
             printf("%d\n", max(query(u, lca(u,v)), query(v, lca(u, v))));
         }
     }

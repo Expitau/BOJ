@@ -1,2 +1,0 @@
-# BOJ
-## by JaeyunK

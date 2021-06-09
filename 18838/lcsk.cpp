@@ -1,22 +1,22 @@
 #include <cstdio>
+#include <cassert>
 #include <algorithm>
 #include <vector>
 
 using namespace std;
-using pll = pair<long, long>;
-using ll = long long;
+using pll = pair<unsigned long long, unsigned long long>;
+using ll = unsigned long long;
 
 ll arr[100100];
 ll N, K;
-const ll INF = 9e18;
 ll L[100100], C[100100];
-pll tree[500400];
+pll tree[500400]; // {구간의 lcs의 길이, 구간의 lcs 경우의 수}
 vector<ll> ans;
 vector<ll> I[100100];
 
 ll safe_add(ll a, ll b){
     ll res = a+b;
-    if (a > K || b > K || res > K) return INF;
+    if (a > K || b > K || res > K) return K+1;
     return res;
 }
 
@@ -52,10 +52,10 @@ pll getAns(int now, int l, int r, int s, int e){
 }
 
 int main(){
-    scanf("%lld %lld", &N, &K);
+    scanf("%llu %llu", &N, &K);
 
     for(int i=1; i<=N; i++){
-       scanf("%lld", arr+i); 
+       scanf("%llu", arr+i); 
     }
 
     for(int i=N; i>0; i--){
@@ -65,6 +65,7 @@ int main(){
             temp = {1,1};
         else
             temp.first++;
+		
         update(1, 1, N+1, nowA, temp);
         L[i] = temp.first, C[i] = temp.second;
     }
@@ -72,33 +73,35 @@ int main(){
     ll L_max = 0;
     
     for(int i=1; i<=N; i++){
-        //printf("%lld : %lld %lld\n", arr[i], L[i], C[i]);
+        //printf("%llu : %llu %llu\n", arr[i], L[i], C[i]);
         I[L[i]].push_back(i);
         L_max = max(L[i], L_max);
     }
     
-    ll total_lis = getAns(1, 1, N+1, 1, N+1).second;
-    //printf("total_lis : %d\n", total_lis);
+    pll total_lis = getAns(1, 1, N+1, 1, N+1);
+    //printf("total_lis : %llu\n", total_lis.first);
 
-    if(total_lis < K){
+    if(total_lis.second < K){
         printf("-1");
     }else{
         ll now_k = 0, last_i = 0;
         for(int i=L_max; i > 0; i--){
-            sort(I[i].begin(), I[i].end(), [&](const ll & a, const ll & b){return arr[a] != arr[b] ? arr[a] < arr[b] : a < b;});
+            sort(I[i].begin(), I[i].end(), [&](const ll & a, const ll & b){
+				return arr[a] != arr[b] ? arr[a] < arr[b] : a < b;});
+			//printf("%llu!!!\n", last_i);
             for(auto it : I[i]){
-                if(it < last_i) continue;
+                if(arr[it] < last_i) continue;
 
                 ll tmp = safe_add(now_k, C[it]);
                 if(tmp >= K){
                     ans.push_back(it);
-                    last_i = it;
+                    last_i = arr[it];
                     break;
                 }
                 now_k = tmp;
             }
         }
-        for(auto it : ans) printf("%lld ", arr[it]);
+        for(auto it : ans) printf("%llu ", arr[it]);
     }
 
     return 0;

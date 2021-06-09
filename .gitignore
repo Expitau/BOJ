@@ -1,6 +1,6 @@
 ## Ignore File ##
 
 .vscode/
-.goorm.manifest
+goorm.manifest
 .DS_Store
 .README.md.icloud

@@ -1,84 +1,108 @@
-#include <cstdio>
-#include <cmath>
+#include <iostream>
 #include <vector>
+#include <algorithm>
+#include <random>
+#include <chrono>
 
 using namespace std;
+
 using ll = long long;
 
-ll checklist[10] = {2, 325, 9375, 28178, 450775, 9780504, 1795265022};
+namespace miller_rabin{
+  ll mul(ll x, ll y, ll mod) { return (__int128)x * y % mod; }
+  
+  ll _pow(ll A, ll B, ll MOD){
+    ll res = 1;
+    A %= MOD;
+    while (B > 0) {
+      if (B & 1)
+          res = mul(res, A, MOD);
+      B = B >> 1;
+      A = mul(A, A, MOD);
+    }
+    return res%MOD;
+  }
+  
+  bool miller_rabin(ll x, ll a) {
+  	if (x % a == 0) return 0;
+  	ll d = x - 1;
+  	while (1) {
+  		ll tmp = _pow(a, d, x);
+  		if (d & 1) return (tmp != 1 && tmp != x - 1);
+  		else if (tmp == x - 1) return 0;
+  		d >>= 1;
+  	}
+  }
+  
+  bool isprime(ll x) {
+  	for (auto& i : { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37 }) {
+  		if (x == i) return 1;
+  		if (x > 40 && miller_rabin(x, i)) return 0;
+  	}
+  	if (x <= 40) return 0;
+  	return 1;
+  }
 
-ll pow(ll a, ll b, ll n){
-	if(b == 0) return 1;
-	ll res = pow(a, b/2, n);
-	res = (res*res)%n;
-	if(b%2) res = (res*a)%n;
-	return res;
 }
 
-ll gcd(ll a, ll b){
-	ll tmp;
-	while(b){
-		tmp = a;
-		a = b;
-		b = tmp%b;
-	}
-	return a;
+
+namespace pollard_rho{
+  ll gcd(ll A, ll B){
+    while(B){
+      ll T = A;
+      A = B;
+      B = T%B;
+    }
+    return A;
+  }
+  
+  void polladRho(ll N, vector<ll> & factor){
+    if(N < 2) return;
+    if(!(N % 2)){
+      factor.push_back(2);
+      polladRho(N/2, factor);
+      return;
+    }
+    if(miller_rabin::isprime(N)){
+      factor.push_back(N);
+      return;
+    }
+    
+    ll x, y, c, d = N;
+    auto g = [&](ll X){
+      return (c+miller_rabin::mul(X,X,N))%N;
+    };
+    do{
+      if(d == N){
+        x = y = rand() % (N-2) + 2;
+        c = rand() % 20 + 1;
+        d = 1;
+      }
+      x = g(x);
+      y = g(g(y));
+      d = gcd(abs(x-y), N);
+    }while(d == 1);
+    
+    polladRho(N/d, factor);
+    polladRho(d, factor);
+  }
+  
+  vector<ll> factorize(ll N){
+    vector<ll> factor;
+    polladRho(N, factor);
+    sort(factor.begin(), factor.end());
+    return factor;
+  }
 }
-bool isPrime(ll n){
-	ll d, s;
-	for(d=n, s=0 ; !(d%2) ; d/=2,s++);
-	printf("%lld %lld %lld\n", n, d, s);
-
-	for(int i=0; i<7 && n <= checklist[i]; i++){
-		ll a = checklist[i];
-		ll temp = pow(a, d, n);
-
-		if(temp == 1) return true;
-		for(int i=0; i<s; i++){
-			if(temp == n-1) return true;
-			temp = (temp*temp)%n;
-		}
-	}
-	return false;
-}
-
-vector<long long> ans;
-
-void getFactor(ll n){
-	if (n==1) return;
-	if(isPrime(n)){
-		ans.push_back(n);
-		return;
-	}
-
-	ll x, y, c, g = n;
-
-	auto f = [=](ll x){
-		return ((__int128_t)x*x%n + c) %n;
-	};
-
-	do{
-		if(g == n){
-			x = y = rand()%(n-2);
-			c = rand()%10 + 1;
-			g = 1;
-		}
-		x = f(x);
-		y = f(f(y));
-		g = gcd((abs(x-y)), n);
-	}while(g == 1);
-	
-	getFactor(g);
-	getFactor(n / g);
-}
-
 
 int main(){
-	ll n;
-	scanf("%lld",&n);
-	getFactor(n);
-	sort(ans.begin(), ans.end());
-	for(auto it : ans) printf("%lld\n", it);
-
-	return 0;
+  ios::sync_with_stdio(false);
+  cin.tie(NULL); cout.tie(NULL);
+  
+  ll num;
+  cin >> num;
+  for(auto it : pollard_rho::factorize(num))
+    cout << it << "\n";
+  
+  return 0;
 }
